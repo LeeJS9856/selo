@@ -1,6 +1,6 @@
 // src/pages/home.tsx
 import React from 'react';
-import { View, SafeAreaView, Dimensions } from 'react-native';
+import { View, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
@@ -8,9 +8,20 @@ import CustomText from '../utils/CustomText';
 // tailwind 설정 적용
 const tw = create(tailwindConfig);
 
-const Home: React.FC = () => {
+interface HomeProps {
+  navigation?: any; // React Navigation의 navigation prop
+}
+
+const Home: React.FC<HomeProps> = ({ navigation }) => {
   const { width, height } = Dimensions.get('window');
   const circleSize = width*2; // 지름이 화면의 가로 길이
+  
+  const handlePress = () => {
+    // interests 페이지로 이동
+    if (navigation) {
+      navigation.navigate('Interests');
+    }
+  };
   
   return (
     <SafeAreaView style={tw`flex-1 bg-white items-center justify-center`}>
@@ -36,8 +47,12 @@ const Home: React.FC = () => {
         ]} 
       />
       
-      {/* 콘텐츠 */}
-      <View style={tw`items-center justify-center z-10`}>
+      {/* 클릭 가능한 콘텐츠 */}
+      <TouchableOpacity 
+        style={tw`items-center justify-center z-10`}
+        onPress={handlePress}
+        activeOpacity={0.8}
+      >
         <CustomText 
             weight="700" 
             style={tw`text-5xl text-white mb-4`}
@@ -56,7 +71,7 @@ const Home: React.FC = () => {
         >
           tincidunt feugiat.
         </CustomText>
-      </View>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

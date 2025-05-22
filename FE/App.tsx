@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import Home from './src/pages/home';
 import Interests from './src/pages/interests';
+import SelectTopic from './src/pages/selectTopic';
 
-type CurrentPage = 'Home' | 'Interests';
+type CurrentPage = 'Home' | 'Interests' | 'SelectTopic';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<CurrentPage>('Interests');
@@ -24,6 +25,8 @@ const App: React.FC = () => {
         return <Home navigation={mockNavigation} />;
       case 'Interests':
         return <Interests navigation={mockNavigation} />;
+      case 'SelectTopic':
+        return <SelectTopic navigation={mockNavigation} />;
       default:
         return <Interests navigation={mockNavigation} />;
     }

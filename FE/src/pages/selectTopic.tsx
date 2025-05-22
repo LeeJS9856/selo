@@ -26,7 +26,7 @@ const interestCategories = [
   '기술',
 ];
 
-const Interests: React.FC<InterestsProps> = ({ navigation }) => {
+const SelectTopic: React.FC<InterestsProps> = ({ navigation }) => {
   const [selectedInterest, setSelectedInterest] = useState<string>('');
   
   const selectInterest = (interest: string) => {
@@ -35,7 +35,7 @@ const Interests: React.FC<InterestsProps> = ({ navigation }) => {
 
   const handleNext = () => {
     console.log('선택된 관심사:', selectedInterest);
-    navigation.navigate('SelectTopic');
+    // navigation.navigate('NextPage');
   };
   
   return (
@@ -68,49 +68,11 @@ const Interests: React.FC<InterestsProps> = ({ navigation }) => {
               관심사를 선택 또는 입력해 주세요.
             </CustomText>
           </View>
-          
-          {/* 관심사 버튼들 */}
-          <View style={tw`flex-row flex-wrap mb-12 justify-center`}>
-            {interestCategories.map((interest, index) => (
-              <InterestButton
-                key={index}
-                title={interest}
-                isSelected={selectedInterest === interest}
-                onPress={() => selectInterest(interest)}
-              />
-            ))}
-          </View>
+
         </ScrollView>
-        
-        {/* 하단 고정 버튼 */}
-        <View style={tw`absolute bottom-0 left-0 right-0 p-6 bg-white`}>
-          <TouchableOpacity
-            style={[
-              tw`rounded-full py-4 px-8 items-center justify-center`,
-              {
-                backgroundColor: selectedInterest.length > 0 ? '#6B54ED' : '#E5E7EB',
-              }
-            ]}
-            onPress={handleNext}
-            disabled={selectedInterest.length === 0}
-            activeOpacity={0.8}
-          >
-            <CustomText 
-              weight="600" 
-              style={[
-                tw`text-base`,
-                { 
-                  color: selectedInterest.length > 0 ? 'white' : '#9CA3AF' 
-                }
-              ]}
-            >
-              확인
-            </CustomText>
-          </TouchableOpacity>
-        </View>
       </View>
     </View>
   );
 };
 
-export default Interests;
+export default SelectTopic;

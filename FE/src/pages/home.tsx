@@ -1,9 +1,10 @@
 // src/pages/home.tsx
 import React from 'react';
-import { View, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Dimensions, TouchableOpacity } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 // tailwind 설정 적용
 const tw = create(tailwindConfig);

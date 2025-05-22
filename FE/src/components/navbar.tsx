@@ -4,7 +4,7 @@ import { View, TouchableOpacity, StatusBar, Platform  } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Octicons';
 
 // tailwind 설정 적용
 const tw = create(tailwindConfig);
@@ -26,7 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   return (
     <>      
-      <View style={tw`bg-primary px-4 flex-row items-center justify-between`}>
+      <View style={tw`bg-primary py-4 px-4 flex-row items-center justify-between`}>
         {/* 왼쪽 홈 아이콘 */}
         <View style={tw`w-8 h-8 items-center justify-center`}>
           {showHomeIcon && (
@@ -36,7 +36,7 @@ const Navbar: React.FC<NavbarProps> = ({
               style={tw`w-full h-full items-center justify-center`}
             >
               <Icon 
-                name="home-outline" 
+                name="home" 
                 size={24} 
                 color="white" 
               />
@@ -62,11 +62,7 @@ const Navbar: React.FC<NavbarProps> = ({
               activeOpacity={0.7}
               style={tw`w-full h-full items-center justify-center`}
             >
-              <Icon 
-                name="moon-outline" 
-                size={24} 
-                color="white" 
-              />
+
             </TouchableOpacity>
           )}
         </View>

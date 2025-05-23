@@ -1,31 +1,38 @@
-import React from 'react';
-import { View } from 'react-native';
-import { create } from 'twrnc';
-import CustomText from './src/utils/CustomText';
-import tailwindConfig from './tailwind.config';
+// App.tsx - 네비게이션 라이브러리 없이 간단한 페이지 전환
+import React, { useState } from 'react';
+import Home from './src/pages/home';
+import Interests from './src/pages/interests';
+import SelectTopic from './src/pages/selectTopic';
 
-const tw = create(tailwindConfig);
+type CurrentPage = 'Home' | 'Interests' | 'SelectTopic';
 
-function App() {
-  return (
-    <View style={tw`flex-1 p-4 items-center justify-center`}>
-      <CustomText weight="100" style={tw`text-xl text-primary mb-2`}>
-        프리텐다드 Thin 텍스트
-      </CustomText>
-      
-      <CustomText weight="200" style={tw`text-xl text-primary mb-2`}>
-        프리텐다드 Regular 텍스트
-      </CustomText>
-      
-      <CustomText weight="300" style={tw`text-xl text-primary mb-2`}>
-        프리텐다드 Bold 텍스트
-      </CustomText>
-      
-      <CustomText weight="900" style={tw`text-xl text-primary mb-2`}>
-        프리텐다드 Black 텍스트
-      </CustomText>
-    </View>
-  );
-}
+const App: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState<CurrentPage>('SelectTopic');
+
+  // 네비게이션 객체 모킹
+  const mockNavigation = {
+    navigate: (pageName: CurrentPage) => {
+      setCurrentPage(pageName);
+    },
+    goBack: () => {
+      setCurrentPage('Home');
+    }
+  };
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'Home':
+        return <Home navigation={mockNavigation} />;
+      case 'Interests':
+        return <Interests navigation={mockNavigation} />;
+      case 'SelectTopic':
+        return <SelectTopic navigation={mockNavigation} />;
+      default:
+        return <SelectTopic navigation={mockNavigation} />;
+    }
+  };
+
+  return renderCurrentPage();
+};
 
 export default App;

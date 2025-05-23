@@ -7,6 +7,7 @@ import CustomText from '../utils/CustomText';
 import Navbar from '../components/navbar';
 import InterestButton from '../components/interestButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import TopicCard from '../components/topicCard';
 
 // tailwind 설정 적용
 const tw = create(tailwindConfig);
@@ -65,8 +66,11 @@ const SelectTopic: React.FC<InterestsProps> = ({ navigation }) => {
               weight="700" 
               style={tw`text-lg text-gray-900 mb-2 text-center`}
             >
-              관심사를 선택 또는 입력해 주세요.
+              발화할 주제를 선택해 주세요.
             </CustomText>
+            <TopicCard
+                title="대통령이 나이가 많은 건"
+                onPress={()=> console.log('토픽 선택')}/>
           </View>
 
         </ScrollView>

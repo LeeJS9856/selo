@@ -7,7 +7,7 @@ import SelectTopic from './src/pages/selectTopic';
 type CurrentPage = 'Home' | 'Interests' | 'SelectTopic';
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<CurrentPage>('Interests');
+  const [currentPage, setCurrentPage] = useState<CurrentPage>('SelectTopic');
 
   // 네비게이션 객체 모킹
   const mockNavigation = {
@@ -28,7 +28,7 @@ const App: React.FC = () => {
       case 'SelectTopic':
         return <SelectTopic navigation={mockNavigation} />;
       default:
-        return <Interests navigation={mockNavigation} />;
+        return <SelectTopic navigation={mockNavigation} />;
     }
   };
 

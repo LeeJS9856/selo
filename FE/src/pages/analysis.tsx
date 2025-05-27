@@ -1,6 +1,6 @@
 // src/pages/analysis.tsx
-import React from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Animated, Easing } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
@@ -29,6 +29,71 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
   const selectedInterest = route?.params?.selectedInterest;
   const recordingTime = route?.params?.recordingTime;
 
+  // 애니메이션 값들 - recordTopic과 동일
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const pulseValue = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // 5초 후에 결과 페이지로 이동
+    const timer = setTimeout(() => {
+      navigation.navigate('Result', {
+        selectedTopic,
+        selectedInterest,
+        recordingTime
+      });
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [navigation, selectedTopic, selectedInterest, recordingTime]);
+
+  useEffect(() => {
+    // 음성 파형 애니메이션 (녹음 페이지와 동일)
+    // 스케일 애니메이션 - 사인파 형태로 자연스럽게
+    const scaleAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleValue, {
+          toValue: 1.3,
+          duration: 800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleValue, {
+          toValue: 0.7,
+          duration: 800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // 펄스 애니메이션 - 더 부드러운 곡선
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseValue, {
+          toValue: 1.5,
+          duration: 1200,
+          easing: Easing.bezier(0.25, 0.46, 0.45, 0.94), // ease-out-quad
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseValue, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.bezier(0.55, 0.06, 0.68, 0.19), // ease-in-quad
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    scaleAnimation.start();
+    pulseAnimation.start();
+
+    // 컴포넌트 언마운트 시 애니메이션 정리
+    return () => {
+      scaleAnimation.stop();
+      pulseAnimation.stop();
+    };
+  }, [scaleValue, pulseValue]);
+
   return (
     <View style={tw`flex-1 bg-primary`}>
       {/* 상태바 영역을 primary 색상으로 */}
@@ -44,34 +109,39 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
       </SafeAreaView>
       
       {/* 메인 콘텐츠 영역 */}
-      <View style={tw`flex-1 bg-white items-center justify-center`}>
-        <CustomText 
-          weight="700" 
-          style={tw`text-2xl text-gray-900 mb-4`}
-        >
-          분석 중...
-        </CustomText>
-        <CustomText 
-          weight="400" 
-          style={tw`text-gray-600 text-center px-6`}
-        >
-          발화 분석 결과를 준비하고 있습니다.
-        </CustomText>
-        
-        {/* 디버그 정보 (개발용) */}
-        {__DEV__ && (
-          <View style={tw`mt-8 p-4 bg-gray-100 rounded-lg`}>
-            <CustomText weight="500" style={tw`text-sm text-gray-700 mb-2`}>
-              선택된 관심사: {selectedInterest}
-            </CustomText>
-            <CustomText weight="500" style={tw`text-sm text-gray-700 mb-2`}>
-              선택된 토픽: {selectedTopic?.title}
-            </CustomText>
-            <CustomText weight="500" style={tw`text-sm text-gray-700`}>
-              녹음 시간: {recordingTime}초
-            </CustomText>
+      <View style={tw`flex-1 bg-gray-50 items-center justify-center`}>
+        {/* 음성 파형 애니메이션 - 크기를 키운 버전 */}
+        <Animated.View style={{ transform: [{ scale: pulseValue }] }}>
+          <View style={[
+            tw`w-48 h-48 rounded-full items-center justify-center mb-12`,
+            {
+              backgroundColor: 'rgba(107, 84, 237, 0.1)',
+            }
+          ]}>
+            <Animated.View 
+              style={[
+                tw`w-32 h-32 rounded-full items-center justify-center`,
+                {
+                  backgroundColor: 'rgba(107, 84, 237, 0.3)',
+                  transform: [{ scale: scaleValue }]
+                }
+              ]}
+            >
+              <View style={[
+                tw`w-20 h-20 rounded-full`,
+                { backgroundColor: '#6B54ED' }
+              ]} />
+            </Animated.View>
           </View>
-        )}
+        </Animated.View>
+
+        {/* 텍스트 */}
+        <CustomText 
+          weight="500" 
+          style={tw`text-gray-700 text-base`}
+        >
+          분석 중입니다...
+        </CustomText>
       </View>
     </View>
   );

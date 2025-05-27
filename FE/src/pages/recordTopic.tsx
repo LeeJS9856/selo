@@ -194,9 +194,9 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
             }
           ]}>
             <CustomText 
-              weight="700" 
+              weight="800" 
               style={[
-                tw`text-lg text-center leading-7`,
+                tw`text-2xl text-center leading-10`,
                 {
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   backgroundClip: 'text',

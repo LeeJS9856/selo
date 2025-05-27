@@ -77,12 +77,6 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
             >
               발화할 주제를 선택해 주세요.
             </CustomText>
-            <CustomText 
-              weight="400" 
-              style={tw`text-sm text-gray-600 mb-6 text-center`}
-            >
-              {selectedInterest} 관련 토픽
-            </CustomText>
           </View>
 
           {/* 토픽 카드들 */}

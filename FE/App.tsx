@@ -4,8 +4,9 @@ import Home from './src/pages/home';
 import Interests from './src/pages/interests';
 import SelectTopic from './src/pages/selectTopic';
 import RecordTopic from './src/pages/recordTopic';
+import Analysis from './src/pages/analysis';
 
-type CurrentPage = 'Home' | 'Interests' | 'SelectTopic' | 'RecordTopic';
+type CurrentPage = 'Home' | 'Interests' | 'SelectTopic' | 'RecordTopic' | 'Analysis';
 
 interface NavigationState {
   selectedInterest?: string;
@@ -44,6 +45,13 @@ const App: React.FC = () => {
       case 'RecordTopic':
         return (
           <RecordTopic 
+            navigation={mockNavigation} 
+            route={{ params: navigationState }}
+          />
+        );
+      case 'Analysis':
+        return (
+          <Analysis 
             navigation={mockNavigation} 
             route={{ params: navigationState }}
           />

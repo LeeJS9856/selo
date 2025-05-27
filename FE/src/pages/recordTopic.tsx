@@ -1,6 +1,6 @@
 // src/pages/recordTopic.tsx
-import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Animated } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, TouchableOpacity, Animated, Easing } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
@@ -27,10 +27,11 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [maxRecordingTime] = useState(180); // 3분 = 180초
   
-  // 애니메이션 값들
-  const scaleValue = new Animated.Value(1);
-  const pulseValue = new Animated.Value(1);
+  // 애니메이션 값들 - useRef로 관리
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const pulseValue = useRef(new Animated.Value(1)).current;
 
   // 전달받은 토픽 정보
   const selectedTopic = route?.params?.selectedTopic;
@@ -58,50 +59,75 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
     
     if (isRecording) {
       interval = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime(prev => {
+          if (prev + 1 >= maxRecordingTime) {
+            // 3분이 지나면 자동으로 녹음 종료
+            stopRecording();
+            return maxRecordingTime;
+          }
+          return prev + 1;
+        });
       }, 1000);
     }
 
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isRecording, maxRecordingTime]);
 
-  // 음성 파형 애니메이션
+  // 음성 파형 애니메이션 (무한 반복)
   useEffect(() => {
-    if (isRecording) {
-      const animate = () => {
-        Animated.sequence([
-          Animated.timing(scaleValue, {
-            toValue: 1.2,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleValue, {
-            toValue: 0.8,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ]).start(() => animate());
-      };
-      animate();
+    let scaleAnimation: Animated.CompositeAnimation;
+    let pulseAnimation: Animated.CompositeAnimation;
 
-      // 펄스 애니메이션
-      const pulse = () => {
+    if (isRecording) {
+      // 스케일 애니메이션 - 사인파 형태로 자연스럽게
+      scaleAnimation = Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseValue, {
+          Animated.timing(scaleValue, {
             toValue: 1.3,
             duration: 800,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleValue, {
+            toValue: 0.7,
+            duration: 800,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      // 펄스 애니메이션 - 더 부드러운 곡선
+      pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseValue, {
+            toValue: 1.5,
+            duration: 1200,
+            easing: Easing.bezier(0.25, 0.46, 0.45, 0.94), // ease-out-quad
             useNativeDriver: true,
           }),
           Animated.timing(pulseValue, {
             toValue: 1,
-            duration: 800,
+            duration: 1200,
+            easing: Easing.bezier(0.55, 0.06, 0.68, 0.19), // ease-in-quad
             useNativeDriver: true,
           }),
-        ]).start(() => pulse());
-      };
-      pulse();
+        ])
+      );
+
+      scaleAnimation.start();
+      pulseAnimation.start();
     }
-  }, [isRecording]);
+    // 컴포넌트 언마운트 시 애니메이션 정리
+    return () => {
+      if (scaleAnimation) {
+        scaleAnimation.stop();
+      }
+      if (pulseAnimation) {
+        pulseAnimation.stop();
+      }
+    };
+  }, [isRecording, scaleValue, pulseValue]);
 
   const startRecording = () => {
     setIsRecording(true);
@@ -112,7 +138,12 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
   const stopRecording = () => {
     setIsRecording(false);
     console.log('녹음 완료');
-    // 다음 단계로 이동하거나 결과 처리
+    // 분석 페이지로 이동
+    navigation.navigate('Analysis', {
+      selectedTopic,
+      selectedInterest,
+      recordingTime
+    });
   };
 
   const changeTopicHandler = () => {
@@ -143,7 +174,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
       {/* 메인 콘텐츠 영역 */}
       <View style={tw`flex-1 bg-white`}>
         {/* 헤더 */}
-        <View style={tw`px-6 pt-8 pb-4 border-b border-gray-100`}>
+        <View style={tw`px-6 pt-8 pb-4`}>
           <CustomText 
             weight="700" 
             style={tw`text-lg text-gray-900 text-center mb-2`}
@@ -155,18 +186,23 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
         {/* 토픽 카드 */}
         <View style={tw`px-6 pt-6`}>
           <View style={[
-            tw`bg-gray-50 rounded-xl p-6 mb-8`,
+            tw`rounded-xl p-6 mb-8`,
             {
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
+              backgroundColor: 'rgba(107, 84, 237, 0.05)',
+              borderWidth: 1,
+              borderColor: 'rgba(107, 84, 237, 0.2)',
             }
           ]}>
             <CustomText 
-              weight="500" 
-              style={tw`text-primary text-base text-center leading-6`}
+              weight="700" 
+              style={[
+                tw`text-lg text-center leading-7`,
+                {
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  backgroundClip: 'text',
+                  color: '#6B54ED',
+                }
+              ]}
             >
               {selectedTopic?.title || '텀블러의 사용 실태와 텀블러가 환경과 경제에 미치는 영향을 설명하세요.'}
             </CustomText>
@@ -181,13 +217,11 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
               {/* 주제 바꾸기 버튼 */}
               <TouchableOpacity
                 style={[
-                  tw`bg-gray-200 rounded-full px-6 py-3 mb-12`,
+                  tw`rounded-full px-4 py-2 mb-12`,
                   {
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 3,
-                    elevation: 2,
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB',
                   }
                 ]}
                 onPress={changeTopicHandler}
@@ -195,7 +229,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
               >
                 <CustomText 
                   weight="500" 
-                  style={tw`text-gray-700 text-sm`}
+                  style={tw`text-gray-600 text-sm`}
                 >
                   주제 바꾸기
                 </CustomText>
@@ -224,7 +258,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
             <>
               {/* 녹음 중 표시 */}
               <View style={[
-                tw`bg-red-500 rounded-full px-4 py-2 mb-12`,
+                tw`bg-red-500 rounded-full px-4 py-1 mb-12`,
                 {
                   shadowColor: '#EF4444',
                   shadowOffset: { width: 0, height: 2 },
@@ -283,11 +317,12 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
             style={[
               tw`rounded-full py-4 px-8 items-center justify-center`,
               {
-                backgroundColor: isRecording ? '#6B54ED' : 'rgba(107, 84, 237, 0.3)',
+                backgroundColor: isRecording ? '#6B54ED' : 'transparent',
+                borderWidth: isRecording ? 0 : 1,
+                borderColor: isRecording ? 'transparent' : '#6B54ED',
               }
             ]}
-            onPress={isRecording ? stopRecording : undefined}
-            disabled={!isRecording}
+            onPress={isRecording ? stopRecording : startRecording}
             activeOpacity={0.8}
           >
             <CustomText 
@@ -295,7 +330,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
               style={[
                 tw`text-base`,
                 { 
-                  color: isRecording ? 'white' : 'rgba(107, 84, 237, 0.7)' 
+                  color: isRecording ? 'white' : '#6B54ED'
                 }
               ]}
             >

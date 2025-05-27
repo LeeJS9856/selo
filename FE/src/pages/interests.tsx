@@ -7,6 +7,7 @@ import CustomText from '../utils/CustomText';
 import Navbar from '../components/navbar';
 import InterestButton from '../components/interestButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { INTEREST_CATEGORIES } from '../constants/topics';
 
 // tailwind 설정 적용
 const tw = create(tailwindConfig);
@@ -14,17 +15,6 @@ const tw = create(tailwindConfig);
 interface InterestsProps {
   navigation?: any;
 }
-
-// 관심사 카테고리 데이터
-const interestCategories = [
-  '정치',
-  '교육',
-  '스포츠',
-  '연예계',
-  '음악',
-  '과학',
-  '기술',
-];
 
 const Interests: React.FC<InterestsProps> = ({ navigation }) => {
   const [selectedInterest, setSelectedInterest] = useState<string>('');
@@ -35,7 +25,8 @@ const Interests: React.FC<InterestsProps> = ({ navigation }) => {
 
   const handleNext = () => {
     console.log('선택된 관심사:', selectedInterest);
-    navigation.navigate('SelectTopic');
+    // 선택된 관심사를 SelectTopic 페이지로 전달
+    navigation.navigate('SelectTopic', { selectedInterest });
   };
   
   return (
@@ -71,7 +62,7 @@ const Interests: React.FC<InterestsProps> = ({ navigation }) => {
           
           {/* 관심사 버튼들 */}
           <View style={tw`flex-row flex-wrap mb-12 justify-center`}>
-            {interestCategories.map((interest, index) => (
+            {INTEREST_CATEGORIES.map((interest, index) => (
               <InterestButton
                 key={index}
                 title={interest}
@@ -113,4 +104,4 @@ const Interests: React.FC<InterestsProps> = ({ navigation }) => {
   );
 };
 
-export default Interests;
+export default Interests

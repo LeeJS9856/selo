@@ -6,13 +6,21 @@ import SelectTopic from './src/pages/selectTopic';
 
 type CurrentPage = 'Home' | 'Interests' | 'SelectTopic';
 
+interface NavigationState {
+  selectedInterest?: string;
+}
+
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<CurrentPage>('SelectTopic');
+  const [currentPage, setCurrentPage] = useState<CurrentPage>('Home');
+  const [navigationState, setNavigationState] = useState<NavigationState>({});
 
   // 네비게이션 객체 모킹
   const mockNavigation = {
-    navigate: (pageName: CurrentPage) => {
+    navigate: (pageName: CurrentPage, params?: any) => {
       setCurrentPage(pageName);
+      if (params) {
+        setNavigationState(prev => ({ ...prev, ...params }));
+      }
     },
     goBack: () => {
       setCurrentPage('Home');
@@ -26,9 +34,14 @@ const App: React.FC = () => {
       case 'Interests':
         return <Interests navigation={mockNavigation} />;
       case 'SelectTopic':
-        return <SelectTopic navigation={mockNavigation} />;
+        return (
+          <SelectTopic 
+            navigation={mockNavigation} 
+            route={{ params: navigationState }}
+          />
+        );
       default:
-        return <SelectTopic navigation={mockNavigation} />;
+        return <Home navigation={mockNavigation} />;
     }
   };
 

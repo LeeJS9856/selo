@@ -41,7 +41,11 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
   const handleNext = () => {
     const selected = currentTopics.find(topic => topic.id === selectedTopic);
     console.log('선택된 토픽:', selected);
-    // 다음 페이지로 이동하거나 토픽으로 토론 시작
+    // 선택된 토픽과 관심사를 RecordTopic 페이지로 전달
+    navigation.navigate('RecordTopic', { 
+      selectedTopic: selected, 
+      selectedInterest 
+    });
   };
   
   return (
@@ -72,6 +76,12 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
               style={tw`text-lg text-gray-900 mb-2 text-center`}
             >
               발화할 주제를 선택해 주세요.
+            </CustomText>
+            <CustomText 
+              weight="400" 
+              style={tw`text-sm text-gray-600 mb-6 text-center`}
+            >
+              {selectedInterest} 관련 토픽
             </CustomText>
           </View>
 

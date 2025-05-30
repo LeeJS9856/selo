@@ -12,31 +12,31 @@ const tw = create(tailwindConfig);
 interface NavbarProps {
   title?: string;
   onHomePress?: () => void;
-  onSettingsPress?: () => void;
+  onBackPress?: () => void;
   showHomeIcon?: boolean;
-  showSettingsIcon?: boolean;
+  showBackIcon?: boolean;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
   title = 'selo',
   onHomePress,
-  onSettingsPress,
+  onBackPress,
   showHomeIcon = true,
-  showSettingsIcon = true
+  showBackIcon = true
 }) => {
   return (
     <>      
       <View style={tw`bg-primary py-4 px-4 flex-row items-center justify-between`}>
         {/* 왼쪽 홈 아이콘 */}
         <View style={tw`w-8 h-8 items-center justify-center`}>
-          {showHomeIcon && (
+          {showBackIcon && (
             <TouchableOpacity
-              onPress={onHomePress}
+              onPress={onBackPress}
               activeOpacity={0.7}
               style={tw`w-full h-full items-center justify-center`}
             >
               <Icon 
-                name="home" 
+                name="arrow-left" 
                 size={24} 
                 color="white" 
               />
@@ -54,15 +54,18 @@ const Navbar: React.FC<NavbarProps> = ({
           </CustomText>
         </View>
 
-        {/* 오른쪽 설정 아이콘 */}
         <View style={tw`w-8 h-8 items-center justify-center`}>
-          {showSettingsIcon && (
+          {showHomeIcon && (
             <TouchableOpacity
-              onPress={onSettingsPress}
+              onPress={onHomePress}
               activeOpacity={0.7}
               style={tw`w-full h-full items-center justify-center`}
             >
-
+              <Icon 
+                name="home" 
+                size={24} 
+                color="white" 
+              />
             </TouchableOpacity>
           )}
         </View>

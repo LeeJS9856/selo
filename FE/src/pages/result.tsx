@@ -7,7 +7,7 @@ import CustomText from '../utils/CustomText';
 import Navbar from '../components/navbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SAMPLE_RESULTS, parseAnalysisText } from '../constants/result';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Feather';
 
 // tailwind 설정 적용
 const tw = create(tailwindConfig);
@@ -43,11 +43,11 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
           let bgColor = 'transparent';
           
           if (segment.type === 'filler') {
-            bgColor = '#D1F4E0'; // 연한 초록색
+            bgColor = '#EF444433'; // 간투어 - 연한 빨간색
           } else if (segment.type === 'repetition') {
-            bgColor = '#FFE4B5'; // 연한 주황색
+            bgColor = '#EAB30833'; // 단어반복 - 연한 주황색
           } else if (segment.type === 'stutter') {
-            bgColor = '#E6E6FA'; // 연한 보라색
+            bgColor = '#34C75933'; // 버벅임 - 연한 초록색
           }
 
           return (
@@ -73,16 +73,16 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
         <Navbar 
           title="selo"
           onHomePress={() => navigation.navigate('Home')}
-          onSettingsPress={() => console.log('설정 클릭')}
+          onBackPress={() => navigation.goBack()}
         />
       </SafeAreaView>
       
       {/* 메인 콘텐츠 영역 */}
       <View style={tw`flex-1 bg-white`}>
         {/* 페이지 헤더 */}
-        <View style={tw`flex-row items-center px-4 py-3`}>
-          <Icon name="list" size={24} color="#374151" style={tw`mr-2`} />
-          <CustomText weight="600" style={tw`text-lg text-gray-900`}>
+        <View style={tw`flex-row items-center px-4 py-4`}>
+          <Icon name="align-left" size={24} color="#374151" style={tw`mr-2`} />
+          <CustomText weight="700" style={tw`text-lg text-gray-900`}>
             발화 내용
           </CustomText>
         </View>
@@ -96,12 +96,12 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
                 tw`flex-row items-center px-3 py-1.5 rounded-full mr-2`,
                 showRepetitions 
                   ? { 
-                      backgroundColor: '#FFE4B5',
+                      backgroundColor: '#EAB30833',
                       borderWidth: 1,
-                      borderColor: '#F59E0B'
+                      borderColor: '#EAB308'
                     }
                   : { 
-                      backgroundColor: '#F3F4F6',
+                      backgroundColor: 'transparent',
                       borderWidth: 1,
                       borderColor: '#D1D5DB'
                     }
@@ -123,12 +123,12 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
                 tw`flex-row items-center px-3 py-1.5 rounded-full mr-2`,
                 showFillers 
                   ? { 
-                      backgroundColor: '#D1F4E0',
+                      backgroundColor: '#EF444433',
                       borderWidth: 1,
-                      borderColor: '#10B981'
+                      borderColor: '#EF4444'
                     }
                   : { 
-                      backgroundColor: '#F3F4F6',
+                      backgroundColor: 'transparent',
                       borderWidth: 1,
                       borderColor: '#D1D5DB'
                     }
@@ -150,12 +150,12 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
                 tw`flex-row items-center px-3 py-1.5 rounded-full`,
                 showStutters 
                   ? { 
-                      backgroundColor: '#E6E6FA',
+                      backgroundColor: '#34C75933',
                       borderWidth: 1,
-                      borderColor: '#9333EA'
+                      borderColor: '#34C759'
                     }
                   : { 
-                      backgroundColor: '#F3F4F6',
+                      backgroundColor: 'transparent',
                       borderWidth: 1,
                       borderColor: '#D1D5DB'
                     }

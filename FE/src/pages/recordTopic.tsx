@@ -167,7 +167,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
         <Navbar 
           title="selo"
           onHomePress={() => navigation.navigate('Home')}
-          onSettingsPress={() => console.log('설정 클릭')}
+          onBackPress={() => navigation.goBack()}
         />
       </SafeAreaView>
       

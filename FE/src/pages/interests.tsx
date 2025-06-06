@@ -39,7 +39,7 @@ const Interests: React.FC<InterestsProps> = ({ navigation }) => {
         <Navbar 
           title="selo"
           onHomePress={() => navigation.navigate('Home')}
-          onSettingsPress={() => console.log('설정 클릭')}
+          onBackPress={() => navigation.goBack()}
         />
       </SafeAreaView>
       

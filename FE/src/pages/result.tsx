@@ -226,6 +226,9 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
         <View style={tw`flex-row items-center px-4 py-4`}>
           <Icon name="align-left" size={24} color="#374151" style={tw`mr-2`} />
           <CustomText weight="700" style={tw`text-lg text-gray-900`}>
+        <View style={tw`flex-row items-center px-4 py-4`}>
+          <Icon name="align-left" size={24} color="#374151" style={tw`mr-2`} />
+          <CustomText weight="700" style={tw`text-lg text-gray-900`}>
             발화 내용
           </CustomText>
         </View>
@@ -241,10 +244,13 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
                 showRepetitions 
                   ? { 
                       backgroundColor: '#EAB30833',
+                      backgroundColor: '#EAB30833',
                       borderWidth: 1,
+                      borderColor: '#EAB308'
                       borderColor: '#EAB308'
                     }
                   : { 
+                      backgroundColor: 'transparent',
                       backgroundColor: 'transparent',
                       borderWidth: 1,
                       borderColor: '#D1D5DB'
@@ -272,6 +278,7 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
                       borderColor: '#34C759'
                     }
                   : { 
+                      backgroundColor: 'transparent',
                       backgroundColor: 'transparent',
                       borderWidth: 1,
                       borderColor: '#D1D5DB'

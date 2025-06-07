@@ -188,8 +188,8 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
       >
         <Navbar 
           title="selo"
-          onHomePress={() => navigation?.navigate('Home')}
-          onBackPress={() => navigation?.goBack()}
+          onHomePress={() => navigation.navigate('Home')}
+          onBackPress={() => navigation.goBack()}
         />
       </SafeAreaView>
       

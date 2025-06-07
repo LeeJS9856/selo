@@ -1,6 +1,6 @@
-// src/pages/selectTopic.tsx
+// selectTopic.tsx - 네비게이션 파라미터 전달 수정
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import TopicCard from '../components/topicCard';
 import { INTEREST_TOPICS, Topic } from '../constants/topics';
 
-// tailwind 설정 적용
 const tw = create(tailwindConfig);
 
 interface SelectTopicProps {
@@ -25,11 +24,9 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [currentTopics, setCurrentTopics] = useState<Topic[]>([]);
   
-  // 전달받은 관심사 또는 기본값
   const selectedInterest = route?.params?.selectedInterest || '정치';
 
   useEffect(() => {
-    // 선택된 관심사에 해당하는 토픽들을 설정
     const topics = INTEREST_TOPICS[selectedInterest] || INTEREST_TOPICS['정치'];
     setCurrentTopics(topics);
   }, [selectedInterest]);
@@ -40,36 +37,60 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
 
   const handleNext = () => {
     const selected = currentTopics.find(topic => topic.id === selectedTopic);
+    
+    if (!selected) {
+      console.error('선택된 토픽을 찾을 수 없습니다.');
+      return;
+    }
+
     console.log('선택된 토픽:', selected);
-    // 선택된 토픽과 관심사를 RecordTopic 페이지로 전달
-    navigation.navigate('RecordTopic', { 
-      selectedTopic: selected, 
-      selectedInterest 
-    });
+    console.log('선택된 관심사:', selectedInterest);
+    
+    // 안전한 네비게이션 파라미터 전달
+    if (navigation) {
+      try {
+        navigation.navigate('RecordTopic', { 
+          selectedTopic: {
+            id: selected.id,
+            title: selected.title
+          }, 
+          selectedInterest: selectedInterest
+        });
+      } catch (error) {
+        console.error('네비게이션 오류:', error);
+      }
+    } else {
+      console.error('Navigation prop이 없습니다.');
+    }
   };
   
   return (
     <View style={tw`flex-1 bg-primary`}>
-      {/* 상태바 영역을 primary 색상으로 */}
       <SafeAreaView 
         edges={['top']} 
         style={tw`bg-primary`}
       >
         <Navbar 
           title="selo"
-          onHomePress={() => navigation.navigate('Home')}
-          onBackPress={() => navigation.goBack()}
+          onHomePress={() => {
+            if (navigation) {
+              navigation.navigate('Home');
+            }
+          }}
+          onBackPress={() => {
+            if (navigation) {
+              navigation.goBack();
+            }
+          }}
         />
       </SafeAreaView>
       
-      {/* 메인 콘텐츠 영역 */}
       <View style={tw`flex-1 bg-white`}>
         <ScrollView 
           style={tw`flex-1`}
           contentContainerStyle={tw`px-6 pt-8 pb-32`}
           showsVerticalScrollIndicator={false}
         >
-          {/* 헤더 */}
           <View style={tw`mb-8`}>
             <CustomText 
               weight="700" 
@@ -79,7 +100,6 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
             </CustomText>
           </View>
 
-          {/* 토픽 카드들 */}
           <View style={tw`mb-8`}>
             {currentTopics.map((topic) => (
               <TopicCard
@@ -92,7 +112,6 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
           </View>
         </ScrollView>
         
-        {/* 하단 고정 버튼 */}
         <View style={tw`absolute bottom-0 left-0 right-0 p-6 bg-white`}>
           <TouchableOpacity
             style={[

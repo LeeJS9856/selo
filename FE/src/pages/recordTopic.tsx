@@ -1,13 +1,14 @@
-// src/pages/recordTopic.tsx
+// src/pages/recordTopic.tsx - 깔끔하게 다시 작성
 import React, { useState, useEffect, useRef } from 'react';
-import { View, TouchableOpacity, Animated, Easing } from 'react-native';
+import { View, TouchableOpacity, Animated, Easing, Alert, PermissionsAndroid, Platform } from 'react-native';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import RNFS from 'react-native-fs';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
 import Navbar from '../components/navbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// tailwind 설정 적용
 const tw = create(tailwindConfig);
 
 interface RecordTopicProps {
@@ -24,18 +25,66 @@ interface RecordTopicProps {
 }
 
 const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
+  // 상태 관리
   const [isRecording, setIsRecording] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [maxRecordingTime] = useState(180); // 3분 = 180초
+  const [audioPath, setAudioPath] = useState<string>('');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playTime, setPlayTime] = useState(0);
   
-  // 애니메이션 값들 - useRef로 관리
+  // 애니메이션 refs
   const scaleValue = useRef(new Animated.Value(1)).current;
   const pulseValue = useRef(new Animated.Value(1)).current;
+  
+  // AudioRecorderPlayer 인스턴스
+  const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
 
-  // 전달받은 토픽 정보
-  const selectedTopic = route?.params?.selectedTopic;
-  const selectedInterest = route?.params?.selectedInterest;
+  // Props에서 데이터 추출
+  const selectedTopic = route?.params?.selectedTopic || {
+    id: 'default',
+    title: '기본 발화 주제입니다.'
+  };
+  const selectedInterest = route?.params?.selectedInterest || '기타';
+
+  // 컴포넌트 마운트
+  useEffect(() => {
+    console.log('RecordTopic 마운트 - 토픽:', selectedTopic.title);
+    requestPermissions();
+    
+    return () => {
+      // 정리
+      if (isPlaying) {
+        audioRecorderPlayer.stopPlayer();
+        audioRecorderPlayer.removePlayBackListener();
+      }
+      if (isRecording) {
+        audioRecorderPlayer.stopRecorder();
+        audioRecorderPlayer.removeRecordBackListener();
+      }
+    };
+  }, []);
+
+  // 권한 요청
+  const requestPermissions = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          {
+            title: '마이크 권한 필요',
+            message: '음성 녹음을 위해 마이크 권한이 필요합니다.',
+            buttonPositive: '허용',
+          }
+        );
+        return granted === 'granted';
+      } catch (err) {
+        console.error('권한 요청 실패:', err);
+        return false;
+      }
+    }
+    return true;
+  };
 
   // 카운트다운 타이머
   useEffect(() => {
@@ -46,7 +95,6 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
         setCountdown(prev => prev - 1);
       }, 1000);
     } else if (countdown === 0 && !isRecording) {
-      // 자동으로 녹음 시작
       startRecording();
     }
 
@@ -59,98 +107,166 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
     
     if (isRecording) {
       interval = setInterval(() => {
-        setRecordingTime(prev => {
-          if (prev + 1 >= maxRecordingTime) {
-            // 3분이 지나면 자동으로 녹음 종료
-            stopRecording();
-            return maxRecordingTime;
-          }
-          return prev + 1;
-        });
+        setRecordingTime(prev => prev + 1);
       }, 1000);
     }
 
     return () => clearInterval(interval);
-  }, [isRecording, maxRecordingTime]);
+  }, [isRecording]);
 
-  // 음성 파형 애니메이션 (무한 반복)
+  // 애니메이션 효과
   useEffect(() => {
-    let scaleAnimation: Animated.CompositeAnimation;
-    let pulseAnimation: Animated.CompositeAnimation;
+    if (!isRecording) return;
 
-    if (isRecording) {
-      // 스케일 애니메이션 - 사인파 형태로 자연스럽게
-      scaleAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(scaleValue, {
-            toValue: 1.3,
-            duration: 800,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleValue, {
-            toValue: 0.7,
-            duration: 800,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-        ])
-      );
+    const scaleAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleValue, {
+          toValue: 1.3,
+          duration: 800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleValue, {
+          toValue: 0.7,
+          duration: 800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
 
-      // 펄스 애니메이션 - 더 부드러운 곡선
-      pulseAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseValue, {
-            toValue: 1.5,
-            duration: 1200,
-            easing: Easing.bezier(0.25, 0.46, 0.45, 0.94), // ease-out-quad
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseValue, {
-            toValue: 1,
-            duration: 1200,
-            easing: Easing.bezier(0.55, 0.06, 0.68, 0.19), // ease-in-quad
-            useNativeDriver: true,
-          }),
-        ])
-      );
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseValue, {
+          toValue: 1.5,
+          duration: 1200,
+          easing: Easing.bezier(0.25, 0.46, 0.45, 0.94),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseValue, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.bezier(0.55, 0.06, 0.68, 0.19),
+          useNativeDriver: true,
+        }),
+      ])
+    );
 
-      scaleAnimation.start();
-      pulseAnimation.start();
-    }
-    // 컴포넌트 언마운트 시 애니메이션 정리
+    scaleAnimation.start();
+    pulseAnimation.start();
+
     return () => {
-      if (scaleAnimation) {
-        scaleAnimation.stop();
-      }
-      if (pulseAnimation) {
-        pulseAnimation.stop();
-      }
+      scaleAnimation.stop();
+      pulseAnimation.stop();
     };
-  }, [isRecording, scaleValue, pulseValue]);
+  }, [isRecording]);
 
-  const startRecording = () => {
-    setIsRecording(true);
-    setRecordingTime(0);
-    console.log('녹음 시작');
+  // 녹음 시작
+  const startRecording = async () => {
+    try {
+      console.log('녹음 시작');
+      
+      const hasPermission = await requestPermissions();
+      if (!hasPermission) {
+        Alert.alert('권한 필요', '마이크 권한이 필요합니다.');
+        return;
+      }
+
+      const timestamp = new Date().getTime();
+      const fileName = `recording_${timestamp}.wav`;
+      const path = `${RNFS.CachesDirectoryPath}/${fileName}`;
+      
+      const audioSet = {
+        AudioEncoderAndroid: 3, // AAC
+        AudioSourceAndroid: 1,  // MIC
+        OutputFormatAndroid: 2, // MPEG_4
+        AVEncoderAudioQualityKeyIOS: 'high',
+        AVNumberOfChannelsKeyIOS: 1,
+        AVFormatIDKeyIOS: 'wav',
+      };
+
+      const result = await audioRecorderPlayer.startRecorder(path, audioSet);
+      console.log('녹음 시작됨:', result);
+      
+      setAudioPath(result || path);
+      setIsRecording(true);
+      setRecordingTime(0);
+
+    } catch (error) {
+      console.error('녹음 시작 실패:', error);
+      Alert.alert('녹음 오류', '녹음을 시작할 수 없습니다.');
+    }
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-    console.log('녹음 완료');
-    // 분석 페이지로 이동
-    navigation.navigate('Analysis', {
-      selectedTopic,
-      selectedInterest,
-      recordingTime
-    });
+  // 녹음 중지
+  const stopRecording = async () => {
+    try {
+      console.log('녹음 중지');
+      setIsRecording(false);
+
+      const result = await audioRecorderPlayer.stopRecorder();
+      audioRecorderPlayer.removeRecordBackListener();
+      
+      const finalPath = result || audioPath;
+      setAudioPath(finalPath);
+      
+      console.log('녹음 완료:', finalPath);
+
+      // Analysis 페이지로 이동 (업로드는 Analysis에서 처리)
+      navigation.navigate('Analysis', {
+        selectedTopic,
+        selectedInterest,
+        recordingTime,
+        audioPath: finalPath
+      });
+
+    } catch (error) {
+      console.error('녹음 중지 실패:', error);
+      Alert.alert('오류', '녹음 중지 중 오류가 발생했습니다.');
+    }
   };
 
-  const changeTopicHandler = () => {
-    // 토픽 선택 페이지로 돌아가기
-    navigation.goBack();
+  // 파일 업로드 (Analysis 페이지에서 결과 처리하도록 수정)
+  const uploadAudioFile = async (filePath: string) => {
+    try {
+      console.log('파일 업로드 시작:', filePath);
+
+      const fileExists = await RNFS.exists(filePath);
+      if (!fileExists) {
+        throw new Error('파일이 존재하지 않습니다');
+      }
+
+      const formData = new FormData();
+      formData.append('file', {
+        uri: Platform.OS === 'android' ? `file://${filePath}` : filePath,
+        type: 'audio/wav',
+        name: 'audio.wav'
+      } as any);
+
+      const response = await fetch('https://api.selo-ai.my/infer', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`서버 오류: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('업로드 성공:', result);
+      return result;
+
+    } catch (error) {
+      console.error('업로드 실패:', error);
+      throw error;
+    }
   };
 
+  // 시간 포맷
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -159,11 +275,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
 
   return (
     <View style={tw`flex-1 bg-primary`}>
-      {/* 상태바 영역을 primary 색상으로 */}
-      <SafeAreaView 
-        edges={['top']} 
-        style={tw`bg-primary`}
-      >
+      <SafeAreaView edges={['top']} style={tw`bg-primary`}>
         <Navbar 
           title="selo"
           onHomePress={() => navigation.navigate('Home')}
@@ -171,19 +283,14 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
         />
       </SafeAreaView>
       
-      {/* 메인 콘텐츠 영역 */}
       <View style={tw`flex-1 bg-white`}>
-        {/* 헤더 */}
+        {/* 주제 표시 */}
         <View style={tw`px-6 pt-8 pb-4`}>
-          <CustomText 
-            weight="700" 
-            style={tw`text-lg text-gray-900 text-center mb-2`}
-          >
+          <CustomText weight="700" style={tw`text-lg text-gray-900 text-center mb-2`}>
             오늘의 발화 주제
           </CustomText>
         </View>
 
-        {/* 토픽 카드 */}
         <View style={tw`px-6 pt-6`}>
           <View style={[
             tw`rounded-xl p-6 mb-8`,
@@ -193,28 +300,19 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
               borderColor: 'rgba(107, 84, 237, 0.2)',
             }
           ]}>
-            <CustomText 
-              weight="800" 
-              style={[
-                tw`text-2xl text-center leading-10`,
-                {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundClip: 'text',
-                  color: '#6B54ED',
-                }
-              ]}
-            >
-              {selectedTopic?.title || '텀블러의 사용 실태와 텀블러가 환경과 경제에 미치는 영향을 설명하세요.'}
+            <CustomText weight="800" style={[
+              tw`text-2xl text-center leading-10`,
+              { color: '#6B54ED' }
+            ]}>
+              {selectedTopic.title}
             </CustomText>
           </View>
         </View>
 
-        {/* 중앙 컨텐츠 영역 */}
+        {/* 중앙 컨텐츠 */}
         <View style={tw`flex-1 items-center justify-center px-6`}>
           {!isRecording ? (
-            // 녹음 시작 전 상태
             <>
-              {/* 주제 바꾸기 버튼 */}
               <TouchableOpacity
                 style={[
                   tw`rounded-full px-4 py-2 mb-12`,
@@ -224,18 +322,14 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
                     borderColor: '#E5E7EB',
                   }
                 ]}
-                onPress={changeTopicHandler}
+                onPress={() => navigation?.goBack()}
                 activeOpacity={0.7}
               >
-                <CustomText 
-                  weight="500" 
-                  style={tw`text-gray-600 text-sm`}
-                >
+                <CustomText weight="500" style={tw`text-gray-600 text-sm`}>
                   주제 바꾸기
                 </CustomText>
               </TouchableOpacity>
 
-              {/* 진행바 */}
               <View style={tw`w-64 h-2 bg-gray-200 rounded-full mb-4`}>
                 <View 
                   style={[
@@ -245,18 +339,12 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
                 />
               </View>
 
-              {/* 카운트다운 텍스트 */}
-              <CustomText 
-                weight="500" 
-                style={tw`text-primary text-sm`}
-              >
+              <CustomText weight="500" style={tw`text-primary text-sm`}>
                 {countdown}초 뒤 시작합니다.
               </CustomText>
             </>
           ) : (
-            // 녹음 중 상태
             <>
-              {/* 녹음 중 표시 */}
               <View style={[
                 tw`bg-red-500 rounded-full px-4 py-1 mb-12`,
                 {
@@ -267,21 +355,15 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
                   elevation: 3,
                 }
               ]}>
-                <CustomText 
-                  weight="600" 
-                  style={tw`text-white text-sm`}
-                >
+                <CustomText weight="600" style={tw`text-white text-sm`}>
                   녹음 중...
                 </CustomText>
               </View>
 
-              {/* 음성 파형 애니메이션 */}
               <Animated.View style={{ transform: [{ scale: pulseValue }] }}>
                 <View style={[
                   tw`w-32 h-32 rounded-full items-center justify-center`,
-                  {
-                    backgroundColor: 'rgba(107, 84, 237, 0.1)',
-                  }
+                  { backgroundColor: 'rgba(107, 84, 237, 0.1)' }
                 ]}>
                   <Animated.View 
                     style={[
@@ -300,19 +382,16 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
                 </View>
               </Animated.View>
 
-              {/* 녹음 시간 */}
-              <CustomText 
-                weight="500" 
-                style={tw`text-primary text-lg mt-6`}
-              >
+              <CustomText weight="500" style={tw`text-primary text-lg mt-6`}>
                 {formatTime(recordingTime)}
               </CustomText>
             </>
           )}
         </View>
 
-        {/* 하단 버튼 */}
+        {/* 하단 버튼들 */}
         <View style={tw`px-6 pb-8`}>
+          {/* 메인 녹음 버튼 */}
           <TouchableOpacity
             style={[
               tw`rounded-full py-4 px-8 items-center justify-center`,
@@ -324,14 +403,13 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
             ]}
             onPress={isRecording ? stopRecording : startRecording}
             activeOpacity={0.8}
+            disabled={isPlaying}
           >
             <CustomText 
               weight="600" 
               style={[
                 tw`text-base`,
-                { 
-                  color: isRecording ? 'white' : '#6B54ED'
-                }
+                { color: isRecording ? 'white' : '#6B54ED' }
               ]}
             >
               {isRecording ? '발화 끝내기' : '바로 시작하기'}

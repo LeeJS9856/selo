@@ -160,10 +160,7 @@ export const INTEREST_TOPICS: Record<string, Topic[]> = {
       id: 'tech_4', 
       title: '미래의 첨단 기술 중 가장 주목받는 기술 하나를 간단히 소개해주시고, 그것이 가져올 기대 효과를 설명해주세요'
     },
-    { 
-      id: 'tech_5', 
-      title: 'tech_5 placeholder - 원본 문서에 4개 주제만 있음'
-    }
+
   ],
   '경제': [
     { 

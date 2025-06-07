@@ -10,7 +10,7 @@ import Result from './src/pages/result';
 type CurrentPage = 'Home' | 'Interests' | 'SelectTopic' | 'RecordTopic' | 'Analysis' | 'Result';
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<CurrentPage>('SelectTopic');
+  const [currentPage, setCurrentPage] = useState<CurrentPage>('Result');
   const [navigationParams, setNavigationParams] = useState<any>({});
 
   // 네비게이션 객체 모킹

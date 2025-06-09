@@ -173,7 +173,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
       }
 
       const timestamp = new Date().getTime();
-      const fileName = `recording_${timestamp}.wav`;
+      const fileName = `recording_${timestamp}.m4a`;
       const path = `${RNFS.CachesDirectoryPath}/${fileName}`;
       
       const audioSet = {

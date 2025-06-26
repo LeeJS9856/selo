@@ -178,11 +178,16 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
       
       const audioSet = {
         AudioEncoderAndroid: 3, // AAC
-        AudioSourceAndroid: 1,  // MIC
+        AudioSourceAndroid: 7,  // MIC
         OutputFormatAndroid: 2, // MPEG_4
+        AudioSampleRateAndroid: 22050,
+        AudioEncodingBitRateAndroid: 96000,
+        AudioChannelsAndroid: 1,
+
         AVEncoderAudioQualityKeyIOS: 'high',
         AVNumberOfChannelsKeyIOS: 1,
-        AVFormatIDKeyIOS: 'wav',
+        AVFormatIDKeyIOS: 'aac',
+        AVSampleRateKeyIOS: 44100,
       };
 
       const result = await audioRecorderPlayer.startRecorder(path, audioSet);

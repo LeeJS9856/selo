@@ -298,28 +298,6 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
             </TouchableOpacity>
           </View>
 
-        </View>
-
-        {/* 하단 버튼들 */}
-        <View style={tw`px-6 pb-8`}>
-          {/* 다시 녹음하기 버튼 */}
-          <TouchableOpacity
-            style={[
-              tw`rounded-full py-3 px-8 items-center justify-center mb-3`,
-              {
-                backgroundColor: 'transparent',
-                borderWidth: 1,
-                borderColor: '#D1D5DB',
-              }
-            ]}
-            onPress={() => navigation?.goBack()}
-            activeOpacity={0.8}
-          >
-            <CustomText weight="500" style={tw`text-base text-gray-600`}>
-              다시 녹음하기
-            </CustomText>
-          </TouchableOpacity>
-
           {/* 다음 버튼 */}
           <TouchableOpacity
             style={[

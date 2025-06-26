@@ -114,8 +114,8 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
       const formData = new FormData();
       formData.append('file', {
         uri: Platform.OS === 'android' ? `file://${filePath}` : filePath,
-        type: 'audio/wav',
-        name: 'audio.wav'
+        type: 'audio/m4a',
+        name: 'audio.m4a'
       } as any);
 
       setAnalysisStatus('서버에서 분석 중...');

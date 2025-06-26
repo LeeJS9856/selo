@@ -64,13 +64,13 @@ const Home: React.FC<HomeProps> = ({ navigation }) => {
           weight="400" 
           style={tw`text-sm text-white text-center px-10 opacity-80`}
         >
-          Enim tortor lacus purus urna pharetra 
+          뚝딱이는 말 버릇,
         </CustomText>
         <CustomText 
           weight="400" 
           style={tw`text-sm text-white text-center px-10 opacity-80`}
         >
-          tincidunt feugiat.
+          이제 스피치 헬퍼 selo와 함께하세요
         </CustomText>
       </TouchableOpacity>
     </SafeAreaView>

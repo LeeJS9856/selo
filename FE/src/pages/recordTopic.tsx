@@ -1,4 +1,4 @@
-// src/pages/recordTopic.tsx - 깔끔하게 다시 작성
+// src/pages/recordTopic.tsx - 완전히 다시 작성
 import React, { useState, useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Animated, Easing, Alert, PermissionsAndroid, Platform } from 'react-native';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
@@ -30,8 +30,6 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
   const [countdown, setCountdown] = useState(60);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioPath, setAudioPath] = useState<string>('');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playTime, setPlayTime] = useState(0);
   
   // 애니메이션 refs
   const scaleValue = useRef(new Animated.Value(1)).current;
@@ -54,10 +52,6 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
     
     return () => {
       // 정리
-      if (isPlaying) {
-        audioRecorderPlayer.stopPlayer();
-        audioRecorderPlayer.removePlayBackListener();
-      }
       if (isRecording) {
         audioRecorderPlayer.stopRecorder();
         audioRecorderPlayer.removeRecordBackListener();
@@ -217,8 +211,8 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
       
       console.log('녹음 완료:', finalPath);
 
-      // Analysis 페이지로 이동 (업로드는 Analysis에서 처리)
-      navigation.navigate('Analysis', {
+      // ReviewRecording 페이지로 이동
+      navigation.navigate('ReviewRecording', {
         selectedTopic,
         selectedInterest,
         recordingTime,
@@ -228,46 +222,6 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
     } catch (error) {
       console.error('녹음 중지 실패:', error);
       Alert.alert('오류', '녹음 중지 중 오류가 발생했습니다.');
-    }
-  };
-
-  // 파일 업로드 (Analysis 페이지에서 결과 처리하도록 수정)
-  const uploadAudioFile = async (filePath: string) => {
-    try {
-      console.log('파일 업로드 시작:', filePath);
-
-      const fileExists = await RNFS.exists(filePath);
-      if (!fileExists) {
-        throw new Error('파일이 존재하지 않습니다');
-      }
-
-      const formData = new FormData();
-      formData.append('file', {
-        uri: Platform.OS === 'android' ? `file://${filePath}` : filePath,
-        type: 'audio/wav',
-        name: 'audio.wav'
-      } as any);
-
-      const response = await fetch('https://api.selo-ai.my/infer', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`서버 오류: ${response.status} - ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('업로드 성공:', result);
-      return result;
-
-    } catch (error) {
-      console.error('업로드 실패:', error);
-      throw error;
     }
   };
 
@@ -396,7 +350,6 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
 
         {/* 하단 버튼들 */}
         <View style={tw`px-6 pb-8`}>
-          {/* 메인 녹음 버튼 */}
           <TouchableOpacity
             style={[
               tw`rounded-full py-4 px-8 items-center justify-center`,
@@ -408,7 +361,6 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
             ]}
             onPress={isRecording ? stopRecording : startRecording}
             activeOpacity={0.8}
-            disabled={isPlaying}
           >
             <CustomText 
               weight="600" 

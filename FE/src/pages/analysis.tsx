@@ -1,4 +1,4 @@
-// src/pages/analysis.tsx - 업로드 처리 및 결과 대기
+// src/pages/analysis.tsx - 기존 분석 결과 처리 로직 추가
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, Easing, Platform } from 'react-native';
 import RNFS from 'react-native-fs';
@@ -21,6 +21,7 @@ interface AnalysisProps {
       selectedInterest?: string;
       recordingTime?: number;
       audioPath?: string;
+      analysisResult?: any; // 이미 분석된 결과가 있을 수 있음
     }
   }
 }
@@ -30,6 +31,7 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
   const selectedInterest = route?.params?.selectedInterest;
   const recordingTime = route?.params?.recordingTime;
   const audioPath = route?.params?.audioPath;
+  const existingAnalysisResult = route?.params?.analysisResult; // 기존 분석 결과
 
   // 분석 상태
   const [analysisStatus, setAnalysisStatus] = useState('분석 중...');
@@ -41,12 +43,29 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
   useEffect(() => {
     console.log('=== Analysis 페이지 진입 ===');
     console.log('토픽:', selectedTopic?.title);
-    console.log('오디오 파일:', audioPath);
+    console.log('기존 분석 결과:', existingAnalysisResult);
     
     // 애니메이션 시작
     startAnimations();
     
-    // 업로드 시작
+    // 이미 분석 결과가 있는 경우 바로 Result로 이동
+    if (existingAnalysisResult) {
+      console.log('이미 분석 완료됨, Result 페이지로 이동');
+      setAnalysisStatus('분석 완료!');
+      
+      setTimeout(() => {
+        navigation.navigate('Result', {
+          selectedTopic,
+          selectedInterest,
+          recordingTime,
+          analysisResult: existingAnalysisResult
+        });
+      }, 1000);
+      
+      return;
+    }
+    
+    // 분석 결과가 없는 경우에만 업로드 시작
     if (audioPath) {
       uploadAudioFile(audioPath);
     }
@@ -227,7 +246,12 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
           발화 내용 분석 중
         </CustomText>
         
-
+        <CustomText 
+          weight="400" 
+          style={tw`text-sm text-gray-600`}
+        >
+          {analysisStatus}
+        </CustomText>
       </View>
     </View>
   );

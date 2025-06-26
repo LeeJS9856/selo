@@ -1,13 +1,14 @@
-// App.tsx - 네비게이션 라이브러리 없이 간단한 페이지 전환
+// App.tsx - ReviewRecording 페이지 추가
 import React, { useState } from 'react';
 import Home from './src/pages/home';
 import Interests from './src/pages/interests';
 import SelectTopic from './src/pages/selectTopic';
 import RecordTopic from './src/pages/recordTopic';
+import ReviewRecording from './src/pages/reviewRecording';
 import Analysis from './src/pages/analysis';
 import Result from './src/pages/result';
 
-type CurrentPage = 'Home' | 'Interests' | 'SelectTopic' | 'RecordTopic' | 'Analysis' | 'Result';
+type CurrentPage = 'Home' | 'Interests' | 'SelectTopic' | 'RecordTopic' | 'ReviewRecording' | 'Analysis' | 'Result';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<CurrentPage>('Home');
@@ -33,8 +34,11 @@ const App: React.FC = () => {
         case 'RecordTopic':
           setCurrentPage('SelectTopic');
           break;
-        case 'Analysis':
+        case 'ReviewRecording':
           setCurrentPage('RecordTopic');
+          break;
+        case 'Analysis':
+          setCurrentPage('ReviewRecording');
           break;
         case 'Result':
           setCurrentPage('Home');
@@ -57,12 +61,14 @@ const App: React.FC = () => {
         return <SelectTopic navigation={mockNavigation} route={route} />;
       case 'RecordTopic':
         return <RecordTopic navigation={mockNavigation} route={route} />;
+      case 'ReviewRecording':
+        return <ReviewRecording navigation={mockNavigation} route={route} />;
       case 'Analysis':
         return <Analysis navigation={mockNavigation} route={route} />;
       case 'Result':
         return <Result navigation={mockNavigation} route={route} />;
       default:
-        return <SelectTopic navigation={mockNavigation} />;
+        return <ReviewRecording navigation={mockNavigation} />;
     }
   };
 

@@ -2,7 +2,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#6B54ED',
+        primary: '#8c0afa',
       },
       fontFamily: {
         // 기본 Pretendard 폰트 설정

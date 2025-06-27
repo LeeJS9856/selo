@@ -225,7 +225,7 @@ const Result: React.FC<ResultProps> = ({ navigation, route }) => {
             <View style={tw`mb-3`}>
               <CustomText 
                 weight="600" 
-                style={[tw`text-base`, { color: '#6B54ED' }]}
+                style={[tw`text-base`, { color: '#8c0afa' }]}
               >
                 {analysisResult?.topic || selectedTopic?.title || '발화 주제'}
               </CustomText>

@@ -79,7 +79,7 @@ const Interests: React.FC<InterestsProps> = ({ navigation }) => {
             style={[
               tw`rounded-full py-4 px-8 items-center justify-center`,
               {
-                backgroundColor: selectedInterest.length > 0 ? '#6B54ED' : '#E5E7EB',
+                backgroundColor: selectedInterest.length > 0 ? '#8c0afa' : '#E5E7EB',
               }
             ]}
             onPress={handleNext}

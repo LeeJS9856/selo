@@ -33,7 +33,7 @@ const TopicCard: React.FC<TopicCardProps> = ({
           elevation: 1,
           minHeight: 80,
           backgroundColor: isSelected ? '#F3F4F6' : '#F9FAFB',
-          borderColor: isSelected ? '#6B54ED' : 'transparent',
+          borderColor: isSelected ? '#8c0afa' : 'transparent',
           borderWidth: isSelected ? 2 : 0,
         }
       ]}
@@ -42,7 +42,7 @@ const TopicCard: React.FC<TopicCardProps> = ({
     >
       <View style={[
         tw`w-10 h-10 rounded-full mr-4 items-center justify-center`,
-        { backgroundColor: isSelected ? '#6B54ED' : '#E5E7EB' }
+        { backgroundColor: isSelected ? '#8c0afa' : '#E5E7EB' }
       ]}>
         <Icon 
           name="mic" 

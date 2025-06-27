@@ -172,10 +172,10 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
       
       const audioSet = {
         AudioEncoderAndroid: 3, // AAC
-        AudioSourceAndroid: 7,  // MIC
-        OutputFormatAndroid: 2, // MPEG_4
-        AudioSampleRateAndroid: 22050,
-        AudioEncodingBitRateAndroid: 96000,
+        AudioSourceAndroid: 0,  // MIC
+        OutputFormatAndroid: 1, // MPEG_4
+        AudioSamplingRateAndroid: 16000,
+        AudioEncodingBitRateAndroid: 128000,
         AudioChannelsAndroid: 1,
 
         AVEncoderAudioQualityKeyIOS: 'high',
@@ -261,7 +261,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
           ]}>
             <CustomText weight="800" style={[
               tw`text-2xl text-center leading-10`,
-              { color: '#6B54ED' }
+              { color: '#8c0afa' }
             ]}>
               {selectedTopic.title}
             </CustomText>
@@ -335,7 +335,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
                   >
                     <View style={[
                       tw`w-12 h-12 rounded-full`,
-                      { backgroundColor: '#6B54ED' }
+                      { backgroundColor: '#8c0afa' }
                     ]} />
                   </Animated.View>
                 </View>
@@ -354,9 +354,9 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
             style={[
               tw`rounded-full py-4 px-8 items-center justify-center`,
               {
-                backgroundColor: isRecording ? '#6B54ED' : 'transparent',
+                backgroundColor: isRecording ? '#8c0afa' : 'transparent',
                 borderWidth: isRecording ? 0 : 1,
-                borderColor: isRecording ? 'transparent' : '#6B54ED',
+                borderColor: isRecording ? 'transparent' : '#8c0afa',
               }
             ]}
             onPress={isRecording ? stopRecording : startRecording}
@@ -366,7 +366,7 @@ const RecordTopic: React.FC<RecordTopicProps> = ({ navigation, route }) => {
               weight="600" 
               style={[
                 tw`text-base`,
-                { color: isRecording ? 'white' : '#6B54ED' }
+                { color: isRecording ? 'white' : '#8c0afa' }
               ]}
             >
               {isRecording ? '발화 끝내기' : '바로 시작하기'}

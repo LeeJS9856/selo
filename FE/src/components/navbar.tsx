@@ -1,9 +1,8 @@
 // components/Navbar.tsx
 import React from 'react';  
-import { View, TouchableOpacity, StatusBar, Platform  } from 'react-native';
+import { View, TouchableOpacity, Image  } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
-import CustomText from '../utils/CustomText';
 import Icon from 'react-native-vector-icons/Octicons';
 
 // tailwind 설정 적용
@@ -18,7 +17,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
-  title = 'selo',
   onHomePress,
   onBackPress,
   showHomeIcon = true,
@@ -44,14 +42,15 @@ const Navbar: React.FC<NavbarProps> = ({
           )}
         </View>
 
-        {/* 중앙 타이틀 */}
-        <View style={tw`flex-1 items-center justify-center`}>
-          <CustomText 
-            weight="700" 
-            style={tw`text-xl text-white`}
-          >
-            {title}
-          </CustomText>
+        <View>
+          <Image 
+            source={require('../../assets/logo/logo_x.png')}
+            style={{
+              width: 100,
+              height: 24,
+              resizeMode: 'contain'
+            }}
+          />
         </View>
 
         <View style={tw`w-8 h-8 items-center justify-center`}>

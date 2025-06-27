@@ -117,7 +117,7 @@ const SelectTopic: React.FC<SelectTopicProps> = ({ navigation, route }) => {
             style={[
               tw`rounded-full py-4 px-8 items-center justify-center`,
               {
-                backgroundColor: selectedTopic.length > 0 ? '#6B54ED' : '#E5E7EB',
+                backgroundColor: selectedTopic.length > 0 ? '#8c0afa' : '#E5E7EB',
               }
             ]}
             onPress={handleNext}

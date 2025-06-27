@@ -1,6 +1,6 @@
 // src/pages/home.tsx
 import React from 'react';
-import { View, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Dimensions, TouchableOpacity, Image } from 'react-native';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
@@ -54,12 +54,17 @@ const Home: React.FC<HomeProps> = ({ navigation }) => {
         onPress={handlePress}
         activeOpacity={0.8}
       >
-        <CustomText 
-            weight="700" 
-            style={tw`text-5xl text-white mb-4`}
-            >
-            selo
-        </CustomText>
+        {/* PNG 로고 */}
+        <View>
+          <Image 
+            source={require('../../assets/logo/logo_y.png')}
+            style={{
+              width: 300,
+              height: 300,
+              resizeMode: 'contain'
+            }}
+          />
+        </View>
         <CustomText 
           weight="400" 
           style={tw`text-sm text-white text-center px-10 opacity-80`}

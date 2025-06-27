@@ -1,7 +1,8 @@
-// src/pages/reviewRecording.tsx - 녹음 재생 페이지
+// src/pages/reviewRecording.tsx - 오디오 메타데이터 표시 기능 추가
 import React, { useState, useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Platform, Alert } from 'react-native';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import RNFS from 'react-native-fs';
 import { create } from 'twrnc';
 import tailwindConfig from '../../tailwind.config.js';
 import CustomText from '../utils/CustomText';
@@ -10,6 +11,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 
 const tw = create(tailwindConfig);
+
+interface AudioMetadata {
+  sampleRate?: number;
+  bitRate?: number;
+  channels?: number;
+  duration?: number;
+  fileSize?: number;
+  format?: string;
+}
 
 interface ReviewRecordingProps {
   navigation?: any;
@@ -40,6 +50,8 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [audioMetadata, setAudioMetadata] = useState<AudioMetadata>({});
+  const [showMetadata, setShowMetadata] = useState(false);
 
   // AudioRecorderPlayer 인스턴스
   const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
@@ -48,8 +60,9 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
     console.log('ReviewRecording 페이지 진입');
     console.log('오디오 파일:', audioPath);
     
-    // 컴포넌트 마운트 시 분석 시작
+    // 컴포넌트 마운트 시 메타데이터 로드 및 분석 시작
     if (audioPath) {
+      loadAudioMetadata();
       startAnalysis();
     }
 
@@ -61,6 +74,63 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
       }
     };
   }, []);
+
+  // 오디오 메타데이터 로드
+  const loadAudioMetadata = async () => {
+    if (!audioPath) return;
+
+    try {
+      // 1. 파일 크기 정보
+      const fileInfo = await RNFS.stat(audioPath);
+      const fileSizeKB = Math.round(fileInfo.size / 1024);
+
+      // 2. AudioRecorderPlayer를 통한 기본 정보
+      // 임시로 재생을 시작해서 메타데이터를 가져온 후 바로 정지
+      const result = await audioRecorderPlayer.startPlayer(audioPath);
+      
+      audioRecorderPlayer.addPlayBackListener((e) => {
+        if (e.duration > 0) {
+          const actualDuration = Math.floor(e.duration / 1000);
+          
+          // 비트레이트 계산 (대략적)
+          const fileSizeBytes = fileInfo.size;
+          const durationSeconds = actualDuration;
+          const bitRateKbps = durationSeconds > 0 ? Math.round((fileSizeBytes * 8) / (durationSeconds * 1000)) : 0;
+
+          setAudioMetadata({
+            duration: actualDuration,
+            fileSize: fileSizeKB,
+            bitRate: bitRateKbps,
+            // 녹음 설정에서 알 수 있는 정보들
+            sampleRate: Platform.OS === 'ios' ? 44100 : 22050,
+            channels: 1, // 모노로 설정됨
+            format: 'm4a'
+          });
+
+          // 메타데이터 로드 후 재생 정지
+          audioRecorderPlayer.stopPlayer();
+          audioRecorderPlayer.removePlayBackListener();
+        }
+      });
+
+      // 잠깐 후 정지 (메타데이터만 가져오기 위함)
+      setTimeout(() => {
+        audioRecorderPlayer.stopPlayer();
+        audioRecorderPlayer.removePlayBackListener();
+      }, 100);
+
+    } catch (error) {
+      console.error('메타데이터 로드 실패:', error);
+      
+      // 기본값 설정
+      setAudioMetadata({
+        sampleRate: Platform.OS === 'ios' ? 44100 : 22050,
+        channels: 1,
+        format: 'm4a',
+        duration: recordingTime
+      });
+    }
+  };
 
   // 백엔드 분석 시작
   const startAnalysis = async () => {
@@ -208,6 +278,14 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // 파일 크기 포맷
+  const formatFileSize = (sizeKB: number) => {
+    if (sizeKB > 1024) {
+      return `${(sizeKB / 1024).toFixed(1)} MB`;
+    }
+    return `${sizeKB} KB`;
+  };
+
   return (
     <View style={tw`flex-1 bg-primary`}>
       <SafeAreaView edges={['top']} style={tw`bg-primary`}>
@@ -236,11 +314,84 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
           ]}>
             <CustomText weight="800" style={[
               tw`text-2xl text-center leading-10`,
-              { color: '#6B54ED' }
+              { color: '#8c0afa' }
             ]}>
-              {selectedTopic.title}
+              {selectedTopic?.title}
             </CustomText>
           </View>
+        </View>
+
+        {/* 오디오 메타데이터 표시 */}
+        <View style={tw`px-6 mb-4`}>
+          <TouchableOpacity
+            style={[
+              tw`flex-row items-center justify-between p-4 rounded-lg`,
+              { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB' }
+            ]}
+            onPress={() => setShowMetadata(!showMetadata)}
+            activeOpacity={0.7}
+          >
+            <CustomText weight="500" style={tw`text-sm text-gray-700`}>
+              오디오 정보
+            </CustomText>
+            <Icon 
+              name={showMetadata ? 'chevron-up' : 'chevron-down'} 
+              size={16} 
+              color="#6B7280" 
+            />
+          </TouchableOpacity>
+          
+          {showMetadata && (
+            <View style={[
+              tw`mt-2 p-4 rounded-lg`,
+              { backgroundColor: '#F9FAFB' }
+            ]}>
+              <View style={tw`flex-row justify-between mb-2`}>
+                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
+                  샘플레이트:
+                </CustomText>
+                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
+                  {audioMetadata.sampleRate ? `${audioMetadata.sampleRate.toLocaleString()} Hz` : 'N/A'}
+                </CustomText>
+              </View>
+              
+              <View style={tw`flex-row justify-between mb-2`}>
+                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
+                  비트레이트:
+                </CustomText>
+                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
+                  {audioMetadata.bitRate ? `${audioMetadata.bitRate} kbps` : 'N/A'}
+                </CustomText>
+              </View>
+              
+              <View style={tw`flex-row justify-between mb-2`}>
+                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
+                  채널:
+                </CustomText>
+                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
+                  {audioMetadata.channels ? `${audioMetadata.channels}채널 (${audioMetadata.channels === 1 ? '모노' : '스테레오'})` : 'N/A'}
+                </CustomText>
+              </View>
+              
+              <View style={tw`flex-row justify-between mb-2`}>
+                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
+                  파일 크기:
+                </CustomText>
+                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
+                  {audioMetadata.fileSize ? formatFileSize(audioMetadata.fileSize) : 'N/A'}
+                </CustomText>
+              </View>
+              
+              <View style={tw`flex-row justify-between`}>
+                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
+                  포맷:
+                </CustomText>
+                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
+                  {audioMetadata.format?.toUpperCase() || 'M4A'}
+                </CustomText>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* 재생 컨트롤 */}
@@ -272,7 +423,7 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
             <TouchableOpacity
               style={[
                 tw`w-16 h-16 rounded-full items-center justify-center mr-4`,
-                { backgroundColor: '#6B54ED' }
+                { backgroundColor: '#8c0afa' }
               ]}
               onPress={togglePlayback}
               activeOpacity={0.8}
@@ -297,12 +448,14 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
               <Icon name="square" size={16} color="#6B7280" />
             </TouchableOpacity>
           </View>
+        </View>
 
+        <View style={tw`px-6 pb-8`}>
           {/* 다음 버튼 */}
           <TouchableOpacity
             style={[
               tw`rounded-full py-4 px-8 items-center justify-center`,
-              { backgroundColor: '#6B54ED' }
+              { backgroundColor: '#8c0afa' }
             ]}
             onPress={handleNext}
             activeOpacity={0.8}

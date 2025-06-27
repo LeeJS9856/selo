@@ -1,4 +1,4 @@
-// src/pages/analysis.tsx - 기존 분석 결과 처리 로직 추가
+// src/pages/analysis.tsx - CorrectedAudio로 이동하도록 수정
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, Easing, Platform } from 'react-native';
 import RNFS from 'react-native-fs';
@@ -21,7 +21,6 @@ interface AnalysisProps {
       selectedInterest?: string;
       recordingTime?: number;
       audioPath?: string;
-      analysisResult?: any; // 이미 분석된 결과가 있을 수 있음
     }
   }
 }
@@ -31,7 +30,6 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
   const selectedInterest = route?.params?.selectedInterest;
   const recordingTime = route?.params?.recordingTime;
   const audioPath = route?.params?.audioPath;
-  const existingAnalysisResult = route?.params?.analysisResult; // 기존 분석 결과
 
   // 분석 상태
   const [analysisStatus, setAnalysisStatus] = useState('분석 중...');
@@ -43,29 +41,11 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
   useEffect(() => {
     console.log('=== Analysis 페이지 진입 ===');
     console.log('토픽:', selectedTopic?.title);
-    console.log('기존 분석 결과:', existingAnalysisResult);
     
     // 애니메이션 시작
     startAnimations();
     
-    // 이미 분석 결과가 있는 경우 바로 Result로 이동
-    if (existingAnalysisResult) {
-      console.log('이미 분석 완료됨, Result 페이지로 이동');
-      setAnalysisStatus('분석 완료!');
-      
-      setTimeout(() => {
-        navigation.navigate('Result', {
-          selectedTopic,
-          selectedInterest,
-          recordingTime,
-          analysisResult: existingAnalysisResult
-        });
-      }, 1000);
-      
-      return;
-    }
-    
-    // 분석 결과가 없는 경우에만 업로드 시작
+    // 오디오 파일이 있으면 업로드 시작
     if (audioPath) {
       uploadAudioFile(audioPath);
     }
@@ -157,21 +137,26 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
 
       setAnalysisStatus('분석 완료!');
 
-      // 잠깐 완료 메시지 표시 후 Result 페이지로 이동
+      // 분석 결과 생성
+      const analysisResult = {
+        topic: result.analysis?.topic || selectedTopic?.title || '분석된 주제',
+        full_text: result.analysis?.full_text || result.text || '분석 결과 없음',
+        statistics: result.analysis?.statistics || '통계 정보 없음',
+        segments: result.segments || [],
+        audio_duration: result.audio_duration_seconds || recordingTime,
+        model: result.model || 'Unknown',
+        corrected_audio_url: result.corrected_audio_url || null, // 교정된 음성 URL 추가
+        raw_response: result
+      };
+
+      // 잠깐 완료 메시지 표시 후 CorrectedAudio 페이지로 이동
       setTimeout(() => {
-        navigation.navigate('Result', {
+        navigation.navigate('CorrectedAudio', {
           selectedTopic,
           selectedInterest,
           recordingTime,
-          analysisResult: {
-            topic: result.analysis?.topic || selectedTopic?.title || '분석된 주제',
-            full_text: result.analysis?.full_text || result.text || '분석 결과 없음',
-            statistics: result.analysis?.statistics || '통계 정보 없음',
-            segments: result.segments || [],
-            audio_duration: result.audio_duration_seconds || recordingTime,
-            model: result.model || 'Unknown',
-            raw_response: result
-          }
+          originalAudioPath: audioPath, // 원본 오디오 경로 전달
+          analysisResult
         });
       }, 1000);
 
@@ -179,12 +164,13 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
       console.error('업로드 실패:', error);
       setAnalysisStatus('분석 실패');
       
-      // 실패 시에도 잠깐 후 Result 페이지로 이동 (오프라인 모드)
+      // 실패 시에도 잠깐 후 CorrectedAudio 페이지로 이동 (오프라인 모드)
       setTimeout(() => {
-        navigation.navigate('Result', {
+        navigation.navigate('CorrectedAudio', {
           selectedTopic,
           selectedInterest,
           recordingTime,
+          originalAudioPath: audioPath,
           analysisResult: {
             topic: selectedTopic?.title || '분석 실패',
             full_text: '서버 연결 실패로 분석 결과를 가져올 수 없습니다.',
@@ -192,6 +178,7 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
             segments: [],
             audio_duration: recordingTime || 0,
             model: 'Offline',
+            corrected_audio_url: null, // 실패 시에는 교정된 음성 없음
             raw_response: null
           }
         });
@@ -232,7 +219,7 @@ const Analysis: React.FC<AnalysisProps> = ({ navigation, route }) => {
             >
               <View style={[
                 tw`w-20 h-20 rounded-full`,
-                { backgroundColor: '#6B54ED' }
+                { backgroundColor: '#8c0afa' }
               ]} />
             </Animated.View>
           </View>

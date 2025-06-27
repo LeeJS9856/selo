@@ -7,8 +7,9 @@ import RecordTopic from './src/pages/recordTopic';
 import ReviewRecording from './src/pages/reviewRecording';
 import Analysis from './src/pages/analysis';
 import Result from './src/pages/result';
+import CorrectedAudio from './src/pages/correctedAudio';
 
-type CurrentPage = 'Home' | 'Interests' | 'SelectTopic' | 'RecordTopic' | 'ReviewRecording' | 'Analysis' | 'Result';
+type CurrentPage = 'Home' | 'Interests' | 'SelectTopic' | 'RecordTopic' | 'ReviewRecording' | 'Analysis' | 'CorrectedAudio' | 'Result';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<CurrentPage>('Home');
@@ -40,9 +41,6 @@ const App: React.FC = () => {
         case 'Analysis':
           setCurrentPage('ReviewRecording');
           break;
-        case 'Result':
-          setCurrentPage('Home');
-          break;
         default:
           setCurrentPage('Home');
       }
@@ -67,6 +65,8 @@ const App: React.FC = () => {
         return <Analysis navigation={mockNavigation} route={route} />;
       case 'Result':
         return <Result navigation={mockNavigation} route={route} />;
+      case 'CorrectedAudio' :
+        return <CorrectedAudio navigation={mockNavigation} route={route} />;
       default:
         return <ReviewRecording navigation={mockNavigation} />;
     }

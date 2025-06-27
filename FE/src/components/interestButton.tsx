@@ -24,9 +24,9 @@ const InterestButton: React.FC<InterestButtonProps> = ({
       style={[
         tw`px-5 py-3 rounded-full mr-3 mb-3`,
         {
-          backgroundColor: isSelected ? '#6B54ED' : 'transparent',
+          backgroundColor: isSelected ? '#8c0afa' : 'transparent',
           borderWidth: 1,
-          borderColor: isSelected ? '#6B54ED' : '#D1D5DB',
+          borderColor: isSelected ? '#8c0afa' : '#D1D5DB',
         }
       ]}
       onPress={onPress}

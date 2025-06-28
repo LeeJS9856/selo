@@ -154,7 +154,7 @@ const CorrectedAudio: React.FC<CorrectedAudioProps> = ({ navigation, route }) =>
       <View style={tw`flex-1 bg-white`}>
         <View style={tw`px-6 pt-8 pb-4`}>
             <CustomText weight="700" style={tw`text-lg text-gray-900 text-center mb-2`}>
-                오늘의 발화 주제
+                AI가 조금 다듬어봤어요
             </CustomText>
         </View>
 

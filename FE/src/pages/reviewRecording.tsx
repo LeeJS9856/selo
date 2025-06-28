@@ -253,7 +253,7 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
 
     if (isAnalysisComplete && analysisResult) {
       // 분석이 완료된 경우 바로 Result 페이지로 이동
-      navigation.navigate('Result', {
+      navigation.navigate('CorrectedAudio', {
         selectedTopic,
         selectedInterest,
         recordingTime,
@@ -320,80 +320,7 @@ const ReviewRecording: React.FC<ReviewRecordingProps> = ({ navigation, route }) 
             </CustomText>
           </View>
         </View>
-
-        {/* 오디오 메타데이터 표시 */}
-        <View style={tw`px-6 mb-4`}>
-          <TouchableOpacity
-            style={[
-              tw`flex-row items-center justify-between p-4 rounded-lg`,
-              { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB' }
-            ]}
-            onPress={() => setShowMetadata(!showMetadata)}
-            activeOpacity={0.7}
-          >
-            <CustomText weight="500" style={tw`text-sm text-gray-700`}>
-              오디오 정보
-            </CustomText>
-            <Icon 
-              name={showMetadata ? 'chevron-up' : 'chevron-down'} 
-              size={16} 
-              color="#6B7280" 
-            />
-          </TouchableOpacity>
-          
-          {showMetadata && (
-            <View style={[
-              tw`mt-2 p-4 rounded-lg`,
-              { backgroundColor: '#F9FAFB' }
-            ]}>
-              <View style={tw`flex-row justify-between mb-2`}>
-                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
-                  샘플레이트:
-                </CustomText>
-                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
-                  {audioMetadata.sampleRate ? `${audioMetadata.sampleRate.toLocaleString()} Hz` : 'N/A'}
-                </CustomText>
-              </View>
-              
-              <View style={tw`flex-row justify-between mb-2`}>
-                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
-                  비트레이트:
-                </CustomText>
-                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
-                  {audioMetadata.bitRate ? `${audioMetadata.bitRate} kbps` : 'N/A'}
-                </CustomText>
-              </View>
-              
-              <View style={tw`flex-row justify-between mb-2`}>
-                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
-                  채널:
-                </CustomText>
-                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
-                  {audioMetadata.channels ? `${audioMetadata.channels}채널 (${audioMetadata.channels === 1 ? '모노' : '스테레오'})` : 'N/A'}
-                </CustomText>
-              </View>
-              
-              <View style={tw`flex-row justify-between mb-2`}>
-                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
-                  파일 크기:
-                </CustomText>
-                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
-                  {audioMetadata.fileSize ? formatFileSize(audioMetadata.fileSize) : 'N/A'}
-                </CustomText>
-              </View>
-              
-              <View style={tw`flex-row justify-between`}>
-                <CustomText weight="400" style={tw`text-sm text-gray-600`}>
-                  포맷:
-                </CustomText>
-                <CustomText weight="500" style={tw`text-sm text-gray-900`}>
-                  {audioMetadata.format?.toUpperCase() || 'M4A'}
-                </CustomText>
-              </View>
-            </View>
-          )}
-        </View>
-
+        
         {/* 재생 컨트롤 */}
         <View style={tw`flex-1 items-center justify-center px-6`}>
           {/* 재생 시간 표시 */}

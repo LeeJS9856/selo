@@ -187,6 +187,12 @@ export const INTEREST_TOPICS: Record<string, Topic[]> = {
       id: 'eco_5', 
       title: '긴 연휴를 경제적으로 보낼 수 있는 스마트한 방법이 있다면 알려주세요'
     }
+  ],
+  '자유주제': [
+    { 
+      id: 'free_1', 
+      title: '뽑으신 주제를 보고 자유롭게 이야기 해 주세요'
+    }
   ]
 };
 
@@ -200,4 +206,5 @@ export const INTEREST_CATEGORIES = [
   '과학',
   '기술',
   '경제',
+  '자유주제',
 ];
